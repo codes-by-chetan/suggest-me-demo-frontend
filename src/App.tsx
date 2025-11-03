@@ -1,9 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Content } from './types';
 import { mockUsers, mockContent, mockReviews, mockActivities, mockRecommendations } from './data/mockData';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { NotificationsProvider, useNotifications } from './contexts/NotificationsContext';
+import { ProfileDropdownProvider } from './contexts/ProfileDropdownContext';
 import { Header } from './components/Header';
 import { MobileBottomNav } from './components/MobileBottomNav';
+import { GlobalPopups } from './components/GlobalPopups';
 import { ContentCard } from './components/ContentCard';
 import { ContentDetails } from './components/ContentDetails';
 import { ActivityFeed } from './components/ActivityFeed';
@@ -27,13 +30,18 @@ import { motion, AnimatePresence } from 'motion/react';
 
 function AppContent() {
   const [currentPage, setCurrentPage] = useState('home');
+  const [previousPage, setPreviousPage] = useState('home');
   const [selectedContent, setSelectedContent] = useState<Content | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [followedUsers, setFollowedUsers] = useState<Set<string>>(new Set(['2', '3']));
   const [searchQuery, setSearchQuery] = useState('');
+  const [isMobile, setIsMobile] = useState(false);
   
   // Mock current user (in a real app, this would come from authentication)
   const currentUser = mockUsers[0];
+  
+  // Get notifications context
+  const { openNotifications } = useNotifications();
 
   const handleContentClick = (content: Content) => {
     setSelectedContent(content);
@@ -41,6 +49,7 @@ function AppContent() {
   };
 
   const handleNavigation = (page: string, query?: string) => {
+    setPreviousPage(currentPage);
     setCurrentPage(page);
     if (query !== undefined) {
       setSearchQuery(query);
@@ -51,6 +60,10 @@ function AppContent() {
     if (page !== 'user-profile') {
       setSelectedUserId(null);
     }
+  };
+
+  const handleBackNavigation = () => {
+    handleNavigation(previousPage);
   };
 
   const handleUserClick = (userId: string) => {
@@ -70,19 +83,46 @@ function AppContent() {
     });
   };
 
+  // Detect mobile screen size
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Handle notification click from profile dropdown
+  const handleNotificationClick = () => {
+    if (isMobile) {
+      handleNavigation('notifications');
+    } else {
+      openNotifications();
+    }
+  };
+
   // Page transition wrapper
-  const PageWrapper = ({ children }: { children: React.ReactNode }) => (
-    <motion.div
-      key={currentPage}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.3, ease: "easeInOut" }}
-      className="min-h-screen bg-background pb-16 md:pb-0"
-    >
-      {children}
-    </motion.div>
-  );
+  const PageWrapper = ({ children }: { children: React.ReactNode }) => {
+    // On mobile chat page, use full screen (no padding for nav bars)
+    const isFullScreenMobile = isMobile && currentPage === 'chat';
+    
+    return (
+      <motion.div
+        key={currentPage}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.3, ease: "easeInOut" }}
+        className={`min-h-screen bg-background ${isFullScreenMobile ? '' : 'pb-16 md:pb-0'}`}
+      >
+        {children}
+      </motion.div>
+    );
+  };
+
+  // Check if we should hide nav bars on mobile
+  const shouldHideNavBars = isMobile && currentPage === 'chat';
 
   // Content Details View
   if (currentPage === 'content-details' && selectedContent) {
@@ -95,6 +135,14 @@ function AppContent() {
             currentPage={currentPage}
             users={mockUsers}
             content={mockContent}
+          />
+          <GlobalPopups
+            currentUser={currentUser}
+            users={mockUsers}
+            content={mockContent}
+            isMobile={isMobile}
+            onNavigate={handleNavigation}
+            onNotificationClick={handleNotificationClick}
           />
           <ContentDetails
             content={selectedContent}
@@ -125,6 +173,14 @@ function AppContent() {
             currentPage={currentPage}
             users={mockUsers}
             content={mockContent}
+          />
+          <GlobalPopups
+            currentUser={currentUser}
+            users={mockUsers}
+            content={mockContent}
+            isMobile={isMobile}
+            onNavigate={handleNavigation}
+            onNotificationClick={handleNotificationClick}
           />
           <UserProfilePage
             users={mockUsers}
@@ -160,6 +216,14 @@ function AppContent() {
             users={mockUsers}
             content={mockContent}
           />
+          <GlobalPopups
+            currentUser={currentUser}
+            users={mockUsers}
+            content={mockContent}
+            isMobile={isMobile}
+            onNavigate={handleNavigation}
+            onNotificationClick={handleNotificationClick}
+          />
           <DiscoverPage
             content={mockContent}
             users={mockUsers}
@@ -187,6 +251,14 @@ function AppContent() {
             currentPage={currentPage}
             users={mockUsers}
             content={mockContent}
+          />
+          <GlobalPopups
+            currentUser={currentUser}
+            users={mockUsers}
+            content={mockContent}
+            isMobile={isMobile}
+            onNavigate={handleNavigation}
+            onNotificationClick={handleNotificationClick}
           />
           <LibraryPage
             content={mockContent}
@@ -216,6 +288,14 @@ function AppContent() {
             currentPage={currentPage}
             users={mockUsers}
             content={mockContent}
+          />
+          <GlobalPopups
+            currentUser={currentUser}
+            users={mockUsers}
+            content={mockContent}
+            isMobile={isMobile}
+            onNavigate={handleNavigation}
+            onNotificationClick={handleNotificationClick}
           />
           <SocialPage
             content={mockContent}
@@ -248,6 +328,14 @@ function AppContent() {
             users={mockUsers}
             content={mockContent}
           />
+          <GlobalPopups
+            currentUser={currentUser}
+            users={mockUsers}
+            content={mockContent}
+            isMobile={isMobile}
+            onNavigate={handleNavigation}
+            onNotificationClick={handleNotificationClick}
+          />
           <SearchPage
             content={mockContent}
             users={mockUsers}
@@ -278,6 +366,14 @@ function AppContent() {
             users={mockUsers}
             content={mockContent}
           />
+          <GlobalPopups
+            currentUser={currentUser}
+            users={mockUsers}
+            content={mockContent}
+            isMobile={isMobile}
+            onNavigate={handleNavigation}
+            onNotificationClick={handleNotificationClick}
+          />
           <NotificationsPage
             users={mockUsers}
             content={mockContent}
@@ -299,23 +395,37 @@ function AppContent() {
     return (
       <AnimatePresence mode="wait">
         <PageWrapper>
-          <Header 
+          {!shouldHideNavBars && (
+            <Header 
+              currentUser={currentUser}
+              onNavigate={handleNavigation}
+              currentPage={currentPage}
+              users={mockUsers}
+              content={mockContent}
+            />
+          )}
+          <GlobalPopups
             currentUser={currentUser}
-            onNavigate={handleNavigation}
-            currentPage={currentPage}
             users={mockUsers}
             content={mockContent}
+            isMobile={isMobile}
+            onNavigate={handleNavigation}
+            onNotificationClick={handleNotificationClick}
           />
           <ChatPage
             users={mockUsers}
             currentUserId={currentUser.id}
+            onBack={handleBackNavigation}
+            isMobileFullScreen={shouldHideNavBars}
           />
-          <MobileBottomNav 
-            currentPage={currentPage}
-            onNavigate={handleNavigation}
-            notificationCount={3}
-            messageCount={7}
-          />
+          {!shouldHideNavBars && (
+            <MobileBottomNav 
+              currentPage={currentPage}
+              onNavigate={handleNavigation}
+              notificationCount={3}
+              messageCount={7}
+            />
+          )}
         </PageWrapper>
       </AnimatePresence>
     );
@@ -332,6 +442,14 @@ function AppContent() {
             currentPage={currentPage}
             users={mockUsers}
             content={mockContent}
+          />
+          <GlobalPopups
+            currentUser={currentUser}
+            users={mockUsers}
+            content={mockContent}
+            isMobile={isMobile}
+            onNavigate={handleNavigation}
+            onNotificationClick={handleNotificationClick}
           />
           <ProfilePage
             users={mockUsers}
@@ -364,6 +482,14 @@ function AppContent() {
             users={mockUsers}
             content={mockContent}
           />
+          <GlobalPopups
+            currentUser={currentUser}
+            users={mockUsers}
+            content={mockContent}
+            isMobile={isMobile}
+            onNavigate={handleNavigation}
+            onNotificationClick={handleNotificationClick}
+          />
           <RecommendationsManager
             recommendations={mockRecommendations}
             users={mockUsers}
@@ -392,6 +518,15 @@ function AppContent() {
           currentPage={currentPage}
           users={mockUsers}
           content={mockContent}
+        />
+        
+        <GlobalPopups
+          currentUser={currentUser}
+          users={mockUsers}
+          content={mockContent}
+          isMobile={isMobile}
+          onNavigate={handleNavigation}
+          onNotificationClick={handleNotificationClick}
         />
         
         <PageTransition>
@@ -693,7 +828,11 @@ function AppContent() {
 export default function App() {
   return (
     <ThemeProvider>
-      <AppContent />
+      <NotificationsProvider>
+        <ProfileDropdownProvider>
+          <AppContent />
+        </ProfileDropdownProvider>
+      </NotificationsProvider>
     </ThemeProvider>
   );
 }
