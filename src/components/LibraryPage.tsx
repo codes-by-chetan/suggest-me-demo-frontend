@@ -85,47 +85,23 @@ export function LibraryPage({
       <div className="container mx-auto px-4 py-6 space-y-6">
         {/* Header */}
         <FadeIn delay={0.1}>
-          <div className="flex items-center justify-between">
-            <div>
-              <motion.h1
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 }}
-                className="text-3xl"
-              >
-                My Library
-              </motion.h1>
-              <motion.p
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 }}
-                className="text-muted-foreground"
-              >
-                Track your entertainment journey
-              </motion.p>
-            </div>
-            <motion.div
-              className="flex items-center gap-2"
-              initial={{ opacity: 0, x: 20 }}
+          <div>
+            <motion.h1
+              initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
+              className="text-2xl sm:text-3xl"
             >
-              <motion.img
-                src={currentUser?.avatar}
-                alt={currentUser?.displayName}
-                className="w-10 h-10 rounded-full object-cover"
-                whileHover={{ scale: 1.1 }}
-                transition={{ type: "spring", stiffness: 400 }}
-              />
-              <div>
-                <p className="text-sm">
-                  {currentUser?.displayName}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  @{currentUser?.username}
-                </p>
-              </div>
-            </motion.div>
+              My Library
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+              className="text-sm sm:text-base text-muted-foreground"
+            >
+              Track your entertainment journey
+            </motion.p>
           </div>
         </FadeIn>
 
@@ -317,7 +293,7 @@ export function LibraryPage({
                         transition={{ delay: 0.2 }}
                       >
                         <div className="flex items-center gap-2">
-                          <motion.div
+                          {/* <motion.div
                             animate={{ rotate: [0, 360] }}
                             transition={{
                               duration: 3,
@@ -342,7 +318,7 @@ export function LibraryPage({
                             <Badge variant="secondary">
                               {watchingContent.length}
                             </Badge>
-                          </motion.div>
+                          </motion.div> */}
                         </div>
                         <motion.div
                           whileHover={{ scale: 1.05 }}
@@ -413,7 +389,7 @@ export function LibraryPage({
                   icon: <Check className="w-4 h-4" />,
                   content: (
                     <div className="space-y-4">
-                      <motion.div
+                      {/* <motion.div
                         className="flex items-center gap-2"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -442,7 +418,7 @@ export function LibraryPage({
                             {watchedContent.length}
                           </Badge>
                         </motion.div>
-                      </motion.div>
+                      </motion.div> */}
                       <StaggerContainer
                         className="grid gap-4"
                         staggerChildren={0.1}
@@ -470,7 +446,7 @@ export function LibraryPage({
                   icon: <BookOpen className="w-4 h-4" />,
                   content: (
                     <div className="space-y-4">
-                      <motion.div
+                      {/* <motion.div
                         className="flex items-center gap-2"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -499,7 +475,7 @@ export function LibraryPage({
                             {watchlistContent.length}
                           </Badge>
                         </motion.div>
-                      </motion.div>
+                      </motion.div> */}
                       <StaggerContainer
                         className="grid gap-4"
                         staggerChildren={0.1}
@@ -527,7 +503,7 @@ export function LibraryPage({
                   icon: <Heart className="w-4 h-4" />,
                   content: (
                     <div className="space-y-4">
-                      <motion.div
+                      {/* <motion.div
                         className="flex items-center gap-2"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -544,7 +520,7 @@ export function LibraryPage({
                         >
                           <Heart className="w-5 h-5 text-red-500" />
                         </motion.div>
-                        <h2 className="text-xl">Favorites</h2>
+                        <h2 className="text-xl">Favoriteghcghcjhs</h2>
                         <motion.div
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
@@ -558,7 +534,7 @@ export function LibraryPage({
                             {favoriteContent.length}
                           </Badge>
                         </motion.div>
-                      </motion.div>
+                      </motion.div> */}
                       <StaggerContainer
                         className="grid gap-4"
                         staggerChildren={0.1}
@@ -586,7 +562,7 @@ export function LibraryPage({
                   icon: <Star className="w-4 h-4" />,
                   content: (
                     <div className="space-y-4">
-                      <motion.div
+                      {/* <motion.div
                         className="flex items-center gap-2"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -620,7 +596,7 @@ export function LibraryPage({
                             {ratedContent.length}
                           </Badge>
                         </motion.div>
-                      </motion.div>
+                      </motion.div> */}
                       <StaggerContainer
                         className="grid gap-4"
                         staggerChildren={0.1}
@@ -754,54 +730,42 @@ export function LibraryPage({
               <Card className="hover:shadow-lg transition-all duration-300">
                 <CardHeader>
                   <CardTitle className="text-lg">
-                    Quick Actions
+                    Your Progress
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
+                <CardContent className="space-y-4">
                   <StaggerContainer
                     staggerChildren={0.1}
                     delayChildren={1.5}
                   >
                     <StaggerItem>
-                      <motion.div
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                      >
-                        <Button
-                          variant="outline"
-                          className="w-full justify-start"
-                        >
-                          <Plus className="w-4 h-4 mr-2" />
-                          Add to Watchlist
-                        </Button>
-                      </motion.div>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">Monthly Goal</span>
+                          <span className="font-medium">12/15 items</span>
+                        </div>
+                        <Progress value={80} className="h-2" />
+                      </div>
+                    </StaggerItem>
+                    <StaggerItem>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">Watchlist Progress</span>
+                          <span className="font-medium">8/24 watched</span>
+                        </div>
+                        <Progress value={33} className="h-2" />
+                      </div>
                     </StaggerItem>
                     <StaggerItem>
                       <motion.div
+                        className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
                         whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
                       >
-                        <Button
-                          variant="outline"
-                          className="w-full justify-start"
-                        >
-                          <Star className="w-4 h-4 mr-2" />
-                          Rate Content
-                        </Button>
-                      </motion.div>
-                    </StaggerItem>
-                    <StaggerItem>
-                      <motion.div
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                      >
-                        <Button
-                          variant="outline"
-                          className="w-full justify-start"
-                        >
-                          <Calendar className="w-4 h-4 mr-2" />
-                          View Calendar
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          <TrendingUp className="w-4 h-4 text-green-500" />
+                          <span className="text-sm">On a 5-day streak!</span>
+                        </div>
+                        <Badge variant="secondary">🔥</Badge>
                       </motion.div>
                     </StaggerItem>
                   </StaggerContainer>

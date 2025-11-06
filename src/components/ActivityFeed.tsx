@@ -4,6 +4,8 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Badge } from './ui/badge';
 import { Star, Clock, Plus, MessageSquare } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
+import { motion } from 'motion/react';
+import { StaggerContainer, StaggerItem } from './PageTransition';
 
 interface ActivityFeedProps {
   activities: UserActivity[];
@@ -59,18 +61,25 @@ export function ActivityFeed({ activities, users, content }: ActivityFeedProps) 
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl">Recent Activity</h2>
+      {/* <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.2 }}
+      >
+        <h2 className="text-xl">Recent Activity</h2>
+      </motion.div> */}
       
-      <div className="space-y-3">
-        {activities.map((activity) => {
+      <StaggerContainer className="space-y-3" staggerChildren={0.1}>
+        {activities.map((activity, index) => {
           const user = users.find(u => u.id === activity.userId);
           const contentItem = content.find(c => c.id === activity.contentId);
           
           if (!user || !contentItem) return null;
           
           return (
-            <Card key={activity.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-4">
+            <StaggerItem key={activity.id} index={index}>
+              <Card className="hover:shadow-md transition-shadow">
+                <CardContent className="p-4">
                 <div className="flex items-start gap-3">
                   <Avatar className="w-10 h-10">
                     <AvatarImage src={user.avatar} alt={user.displayName} />
@@ -118,10 +127,11 @@ export function ActivityFeed({ activities, users, content }: ActivityFeedProps) 
                   </div>
                 </div>
               </CardContent>
-            </Card>
+              </Card>
+            </StaggerItem>
           );
         })}
-      </div>
+      </StaggerContainer>
     </div>
   );
 }

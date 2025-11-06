@@ -27,6 +27,7 @@ import { Card, CardContent, CardHeader, CardTitle } from './components/ui/card';
 import { Badge } from './components/ui/badge';
 import { TrendingUp, Star, Users, Clock, Plus, Heart, Activity } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { Toaster } from './components/ui/sonner';
 
 function AppContent() {
   const [currentPage, setCurrentPage] = useState('home');
@@ -634,7 +635,7 @@ function AppContent() {
                         icon: <TrendingUp className="w-4 h-4" />,
                         content: (
                           <div className="space-y-4">
-                            <motion.div 
+                            {/* <motion.div 
                               className="flex items-center gap-2"
                               initial={{ opacity: 0, x: -20 }}
                               animate={{ opacity: 1, x: 0 }}
@@ -642,7 +643,7 @@ function AppContent() {
                             >
                               <TrendingUp className="w-5 h-5" />
                               <h2 className="text-xl">Trending Content</h2>
-                            </motion.div>
+                            </motion.div> */}
                             <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" staggerChildren={0.1}>
                               {mockContent
                                 .sort((a, b) => b.stats.watched - a.stats.watched)
@@ -831,6 +832,7 @@ export default function App() {
       <NotificationsProvider>
         <ProfileDropdownProvider>
           <AppContent />
+          <Toaster />
         </ProfileDropdownProvider>
       </NotificationsProvider>
     </ThemeProvider>

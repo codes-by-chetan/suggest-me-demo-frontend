@@ -107,42 +107,47 @@ export function DiscoverPage({
                   and podcasts recommended by our community.
                 </p>
               </FadeIn>
-              <StaggerContainer
-                className="flex flex-wrap gap-2"
-                staggerChildren={0.05}
-                delayChildren={0.4}
-              >
-                {categories.map((category, index) => {
-                  const Icon = category.icon;
-                  return (
-                    <StaggerItem
-                      key={category.id}
-                      index={index}
-                    >
-                      <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <Button
-                          variant={
-                            selectedCategory === category.id
-                              ? "default"
-                              : "outline"
-                          }
-                          size="sm"
-                          onClick={() =>
-                            setSelectedCategory(category.id)
-                          }
-                          className="flex items-center gap-2 transition-all duration-300"
+              <div className="relative -mx-6 px-6 md:mx-0 md:px-0">
+                <div className="overflow-x-auto pb-2 scrollbar-hide">
+                  <StaggerContainer
+                    className="flex flex-nowrap md:flex-wrap gap-2 min-w-min"
+                    staggerChildren={0.05}
+                    delayChildren={0.4}
+                  >
+                    {categories.map((category, index) => {
+                      const Icon = category.icon;
+                      return (
+                        <StaggerItem
+                          key={category.id}
+                          index={index}
+                          className="flex-shrink-0"
                         >
-                          <Icon className="w-4 h-4" />
-                          {category.label}
-                        </Button>
-                      </motion.div>
-                    </StaggerItem>
-                  );
-                })}
-              </StaggerContainer>
+                          <motion.div
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                          >
+                            <Button
+                              variant={
+                                selectedCategory === category.id
+                                  ? "default"
+                                  : "outline"
+                              }
+                              size="sm"
+                              onClick={() =>
+                                setSelectedCategory(category.id)
+                              }
+                              className="flex items-center gap-2 transition-all duration-300 whitespace-nowrap"
+                            >
+                              <Icon className="w-4 h-4" />
+                              {category.label}
+                            </Button>
+                          </motion.div>
+                        </StaggerItem>
+                      );
+                    })}
+                  </StaggerContainer>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </SlideInCard>
@@ -284,7 +289,7 @@ export function DiscoverPage({
                     icon: <TrendingUp className="w-4 h-4" />,
                     content: (
                       <div className="space-y-4">
-                        <motion.div
+                        {/* <motion.div
                           className="flex items-center gap-2"
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
@@ -309,7 +314,7 @@ export function DiscoverPage({
                               {trendingContent.length} items
                             </Badge>
                           </motion.div>
-                        </motion.div>
+                        </motion.div> */}
                         <AnimatePresence mode="wait">
                           <motion.div
                             key={viewMode}
@@ -353,7 +358,7 @@ export function DiscoverPage({
                     icon: <Star className="w-4 h-4" />,
                     content: (
                       <div className="space-y-4">
-                        <motion.div
+                        {/* <motion.div
                           className="flex items-center gap-2"
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
@@ -376,7 +381,7 @@ export function DiscoverPage({
                               {topRatedContent.length} items
                             </Badge>
                           </motion.div>
-                        </motion.div>
+                        </motion.div> */}
                         <AnimatePresence mode="wait">
                           <motion.div
                             key={viewMode}
@@ -420,7 +425,7 @@ export function DiscoverPage({
                     icon: <Activity className="w-4 h-4" />,
                     content: (
                       <div className="space-y-4">
-                        <motion.div
+                        {/* <motion.div
                           className="flex items-center gap-2"
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
@@ -428,9 +433,9 @@ export function DiscoverPage({
                         >
                           <motion.div>
                             <Activity className="w-5 h-5 text-yellow-500" />
-                            {/* <Badge className="w-5 h-5 rounded-full p-1 flex items-center justify-center ">
+                            <Badge className="w-5 h-5 rounded-full p-1 flex items-center justify-center ">
                               New
-                            </Badge> */}
+                            </Badge>
                           </motion.div>
                           <h2 className="text-xl">
                             Recently Added
@@ -448,7 +453,7 @@ export function DiscoverPage({
                               {recentlyAdded.length} items
                             </Badge>
                           </motion.div>
-                        </motion.div>
+                        </motion.div> */}
                         <AnimatePresence mode="wait">
                           <motion.div
                             key={viewMode}
@@ -492,7 +497,7 @@ export function DiscoverPage({
                     icon: <Filter className="w-4 h-4" />,
                     content: (
                       <div className="space-y-4">
-                        <motion.div
+                        {/* <motion.div
                           className="flex items-center gap-2"
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
@@ -517,7 +522,7 @@ export function DiscoverPage({
                               {filteredContent.length} items
                             </Badge>
                           </motion.div>
-                        </motion.div>
+                        </motion.div> */}
                         <AnimatePresence mode="wait">
                           <motion.div
                             key={`${viewMode}-${selectedCategory}`}

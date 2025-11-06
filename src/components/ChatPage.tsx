@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { User } from "../types";
 import { Button } from "./ui/button";
+import { ChatEmojiPicker } from "./ChatEmojiPicker";
+import { EmojiAutocomplete } from "./EmojiAutocomplete";
 import {
   Card,
   CardContent,
@@ -77,6 +79,17 @@ export function ChatPage({
   const [searchQuery, setSearchQuery] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [attachments, setAttachments] = useState<File[]>([]);
+  const [emojiAutocomplete, setEmojiAutocomplete] = useState<{
+    show: boolean;
+    query: string;
+    position: { top: number; left: number };
+    colonIndex: number;
+  }>({
+    show: false,
+    query: '',
+    position: { top: 0, left: 0 },
+    colonIndex: -1,
+  });
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -262,18 +275,45 @@ export function ChatPage({
     return otherUser?.avatar;
   };
 
-  const getTimeString = (timestamp: string) => {
+  const getTimeString = (
+    timestamp: string,
+    format: "full" | "short" = "full",
+  ): string => {
     const date = new Date(timestamp);
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
 
-    if (diffDays > 0) return `${diffDays}d`;
-    if (diffHours > 0) return `${diffHours}h`;
-    if (diffMins > 0) return `${diffMins}m`;
-    return "now";
+    const diffSeconds = Math.floor(diffMs / 1000);
+    const diffMinutes = Math.floor(diffSeconds / 60);
+    const diffHours = Math.floor(diffMinutes / 60);
+    const diffDays = Math.floor(diffHours / 24);
+    const diffWeeks = Math.floor(diffDays / 7);
+    const diffMonths = Math.floor(diffDays / 30);
+    const diffYears = Math.floor(diffDays / 365);
+
+    if (format === "short") {
+      if (diffSeconds < 60) return "now";
+      if (diffMinutes < 60) return `${diffMinutes}m`;
+      if (diffHours < 24) return `${diffHours}h`;
+      if (diffDays < 7) return `${diffDays}d`;
+      if (diffWeeks < 5) return `${diffWeeks}w`;
+      if (diffMonths < 12) return `${diffMonths}mo`;
+      return `${diffYears}y`;
+    }
+
+    // Full format (default)
+    if (diffSeconds < 60) return "just now";
+    if (diffMinutes < 60)
+      return `${diffMinutes} minute${diffMinutes > 1 ? "s" : ""} ago`;
+    if (diffHours < 24)
+      return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+    if (diffDays < 7)
+      return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
+    if (diffWeeks < 5)
+      return `${diffWeeks} week${diffWeeks > 1 ? "s" : ""} ago`;
+    if (diffMonths < 12)
+      return `${diffMonths} month${diffMonths > 1 ? "s" : ""} ago`;
+    return `${diffYears} year${diffYears > 1 ? "s" : ""} ago`;
   };
 
   const sendMessage = () => {
@@ -307,6 +347,63 @@ export function ChatPage({
     }, 0);
   };
 
+  const handleEmojiAutocompleteSelect = (emoji: string, nameLength: number) => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const { colonIndex } = emojiAutocomplete;
+    const beforeColon = newMessage.substring(0, colonIndex);
+    const afterQuery = newMessage.substring(colonIndex + nameLength + 1);
+    
+    setNewMessage(beforeColon + emoji + afterQuery);
+    setEmojiAutocomplete({ show: false, query: '', position: { top: 0, left: 0 }, colonIndex: -1 });
+
+    // Set cursor position after emoji
+    setTimeout(() => {
+      const newCursorPos = beforeColon.length + emoji.length;
+      textarea.setSelectionRange(newCursorPos, newCursorPos);
+      textarea.focus();
+      adjustTextareaHeight();
+    }, 0);
+  };
+
+  const checkForEmojiAutocomplete = (text: string, cursorPosition: number) => {
+    // Find the last colon before cursor
+    const textBeforeCursor = text.substring(0, cursorPosition);
+    const lastColonIndex = textBeforeCursor.lastIndexOf(':');
+    
+    // Check if there's a colon and it's either at start or preceded by whitespace
+    if (lastColonIndex >= 0 && (lastColonIndex === 0 || /\s/.test(text[lastColonIndex - 1]))) {
+      const query = textBeforeCursor.substring(lastColonIndex + 1);
+      
+      // Only show autocomplete if query is valid (no spaces and reasonable length)
+      if (query.length > 0 && query.length <= 20 && !query.includes(' ') && !query.includes(':')) {
+        // Calculate position for autocomplete popup
+        const textarea = textareaRef.current;
+        if (textarea) {
+          const rect = textarea.getBoundingClientRect();
+          const position = {
+            top: rect.top - 250, // Position above the textarea
+            left: rect.left,
+          };
+          
+          setEmojiAutocomplete({
+            show: true,
+            query,
+            position,
+            colonIndex: lastColonIndex,
+          });
+          return;
+        }
+      }
+    }
+    
+    // Hide autocomplete if conditions not met
+    if (emojiAutocomplete.show) {
+      setEmojiAutocomplete({ show: false, query: '', position: { top: 0, left: 0 }, colonIndex: -1 });
+    }
+  };
+
   const handleFileSelect = (
     e: React.ChangeEvent<HTMLInputElement>,
   ) => {
@@ -331,8 +428,13 @@ export function ChatPage({
   const handleTextareaChange = (
     e: React.ChangeEvent<HTMLTextAreaElement>,
   ) => {
-    setNewMessage(e.target.value);
+    const newValue = e.target.value;
+    setNewMessage(newValue);
     adjustTextareaHeight();
+    
+    // Check for emoji autocomplete
+    const cursorPosition = e.target.selectionStart;
+    checkForEmojiAutocomplete(newValue, cursorPosition);
   };
 
   const selectedConversation = conversations.find(
@@ -372,35 +474,46 @@ export function ChatPage({
     };
 
     // Push a state to enable back button handling
-    window.history.pushState({ page: 'chat' }, '', '');
-    window.addEventListener('popstate', handlePopState);
+    window.history.pushState({ page: "chat" }, "", "");
+    window.addEventListener("popstate", handlePopState);
 
     return () => {
-      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener("popstate", handlePopState);
     };
   }, [isMobileFullScreen, onBack, selectedChat]);
 
   // Container wrapper component
-  const Container = isMobileFullScreen ? 'div' : Card;
-  const containerProps = isMobileFullScreen ? {} : { className: "flex-1 flex flex-col shadow-sm" };
+  const Container = isMobileFullScreen ? "div" : Card;
+  const containerProps = isMobileFullScreen
+    ? {}
+    : { className: "flex-1 flex flex-col shadow-sm" };
 
   return (
-    <div className={`${isMobileFullScreen ? 'h-screen flex flex-col' : 'container mx-auto px-4 py-6'}`}>
-      <div className={`flex flex-col md:flex-row gap-0 md:gap-6 ${isMobileFullScreen
-        ? 'h-full'
-        : 'h-[calc(100vh-12rem)] md:h-[calc(100vh-8rem)]'
-        }`}>
+    <div
+      className={`${isMobileFullScreen ? "h-screen flex flex-col" : "container mx-auto px-4 py-6"}`}
+    >
+      <div
+        className={`flex flex-col md:flex-row gap-0 md:gap-6 ${
+          isMobileFullScreen
+            ? "h-full"
+            : "h-[calc(100vh-12rem)] md:h-[calc(100vh-8rem)]"
+        }`}
+      >
         {/* Chat List Sidebar */}
         <div
-          className={`${selectedChat ? "hidden md:flex" : "flex"
-            } w-full md:w-80 lg:w-96 flex-col ${isMobileFullScreen ? 'h-full' : ''}`}
+          className={`${
+            selectedChat ? "hidden md:flex" : "flex"
+          } w-full md:w-80 lg:w-96 flex-col ${isMobileFullScreen ? "h-full" : ""}`}
         >
           {isMobileFullScreen ? (
             // Mobile native view without card
             <div className="flex-1 flex flex-col bg-background">
               <div className="px-4 py-3 border-b bg-background">
                 <div className="flex items-center justify-between mb-3">
-                  <ArrowLeft className="w-6 h-6 flex-shrink-0"  onClick={onBack}/>
+                  <ArrowLeft
+                    className="w-6 h-6 flex-shrink-0"
+                    onClick={onBack}
+                  />
                   <h1 className="text-xl font-semibold flex items-center gap-2">
                     <MessageSquare className="w-6 h-6 flex-shrink-0" />
                     Messages
@@ -438,10 +551,11 @@ export function ChatPage({
                     return (
                       <div
                         key={conversation.id}
-                        className={`relative overflow-visible p-3 cursor-pointer transition-all duration-200 active:scale-[0.98] active:bg-muted touch-manipulation mb-1 ${isActive
-                          ? "bg-primary/10"
-                          : "hover:bg-muted/70"
-                          }`}
+                        className={`relative overflow-visible p-3 cursor-pointer transition-all duration-200 active:scale-[0.98] active:bg-muted touch-manipulation mb-1 ${
+                          isActive
+                            ? "bg-primary/10"
+                            : "hover:bg-muted/70"
+                        }`}
                         onClick={() =>
                           setSelectedChat(conversation.id)
                         }
@@ -496,28 +610,29 @@ export function ChatPage({
                             </div>
                             <div className="flex items-center gap-1.5">
                               <p
-                                className={`text-sm truncate flex-1 max-w-60 ${hasUnread
-                                  ? "text-foreground font-medium"
-                                  : "text-muted-foreground"
-                                  }`}
+                                className={`text-sm truncate flex-1 max-w-60 ${
+                                  hasUnread
+                                    ? "text-foreground font-medium"
+                                    : "text-muted-foreground"
+                                }`}
                               >
                                 {conversation.lastMessage
                                   .senderId ===
                                   currentUserId && (
-                                    <span className="inline-flex items-center gap-0.5 mr-1">
-                                      {conversation.lastMessage
-                                        .read ? (
-                                        <CheckCheck className="w-3.5 h-3.5 text-blue-500" />
-                                      ) : (
-                                        <Check className="w-3.5 h-3.5" />
-                                      )}
-                                    </span>
-                                  )}
+                                  <span className="inline-flex items-center gap-0.5 mr-1">
+                                    {conversation.lastMessage
+                                      .read ? (
+                                      <CheckCheck className="w-3.5 h-3.5 text-blue-500" />
+                                    ) : (
+                                      <Check className="w-3.5 h-3.5" />
+                                    )}
+                                  </span>
+                                )}
                                 {conversation.lastMessage
                                   .type === "recommendation"
                                   ? "📽️ Shared a recommendation"
                                   : conversation.lastMessage
-                                    .message}
+                                      .message}
                               </p>
                             </div>
                           </div>
@@ -530,8 +645,8 @@ export function ChatPage({
             </div>
           ) : (
             // Desktop card view
-            <Card className="flex-1 flex flex-col shadow-sm">
-              <CardHeader className="pb-3 px-4 md:px-5 border-b">
+            <Card className="flex-1 flex flex-col shadow-sm overflow-hidden h-full">
+              <CardHeader className="pb-3 px-4 md:px-5 border-b flex-shrink-0">
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
                     <MessageSquare className="w-5 h-5 flex-shrink-0" />
@@ -557,107 +672,112 @@ export function ChatPage({
                   />
                 </div>
               </CardHeader>
-              <CardContent className="flex-1 p-0">
+              <CardContent className="flex-1 p-0 overflow-hidden min-h-0">
                 <ScrollArea className="h-full">
                   <div className="p-2">
-                    {filteredConversations.map((conversation) => {
-                      const otherUsers =
-                        getOtherParticipants(conversation);
-                      const isActive =
-                        selectedChat === conversation.id;
-                      const hasUnread =
-                        conversation.unreadCount > 0;
+                    {filteredConversations.map(
+                      (conversation) => {
+                        const otherUsers =
+                          getOtherParticipants(conversation);
+                        const isActive =
+                          selectedChat === conversation.id;
+                        const hasUnread =
+                          conversation.unreadCount > 0;
 
-                      return (
-                        <div
-                          key={conversation.id}
-                          className={`relative overflow-visible p-3 rounded-xl cursor-pointer transition-all duration-200 active:scale-[0.98] touch-manipulation mb-1 group ${isActive
-                            ? "bg-primary/10 shadow-sm"
-                            : "hover:bg-muted/70 active:bg-muted"
+                        return (
+                          <div
+                            key={conversation.id}
+                            className={`relative overflow-visible p-3 rounded-xl cursor-pointer transition-all duration-200 active:scale-[0.98] touch-manipulation mb-1 group ${
+                              isActive
+                                ? "bg-primary/10 shadow-sm"
+                                : "hover:bg-muted/70 active:bg-muted"
                             }`}
-                          onClick={() =>
-                            setSelectedChat(conversation.id)
-                          }
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="relative flex-shrink-0">
-                              {conversation.isGroup ? (
-                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center ring-2 ring-background">
-                                  <Users className="w-6 h-6 text-primary" />
-                                </div>
-                              ) : (
-                                <Avatar className="w-12 h-12 ring-2 ring-background">
-                                  <AvatarImage
-                                    src={getChatAvatar(
-                                      conversation,
-                                    )}
-                                  />
-                                  <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10 text-primary">
-                                    {otherUsers[0]?.displayName.charAt(
-                                      0,
-                                    )}
-                                  </AvatarFallback>
-                                </Avatar>
-                              )}
-                              {hasUnread && (
-                                <Badge className="absolute -top-1 -right-1 h-5 min-w-[20px] px-1.5 rounded-full flex items-center justify-center text-xs shadow-sm">
-                                  {conversation.unreadCount > 9
-                                    ? "9+"
-                                    : conversation.unreadCount}
-                                </Badge>
-                              )}
-                              {!hasUnread &&
-                                !conversation.isGroup && (
-                                  <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-background" />
+                            onClick={() =>
+                              setSelectedChat(conversation.id)
+                            }
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="relative flex-shrink-0">
+                                {conversation.isGroup ? (
+                                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center ring-2 ring-background">
+                                    <Users className="w-6 h-6 text-primary" />
+                                  </div>
+                                ) : (
+                                  <Avatar className="w-12 h-12 ring-2 ring-background">
+                                    <AvatarImage
+                                      src={getChatAvatar(
+                                        conversation,
+                                      )}
+                                    />
+                                    <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10 text-primary">
+                                      {otherUsers[0]?.displayName.charAt(
+                                        0,
+                                      )}
+                                    </AvatarFallback>
+                                  </Avatar>
                                 )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-baseline justify-between gap-2 mb-0.5">
-                                <h3
-                                  className={`truncate flex-1 min-w-0 ${hasUnread ? "font-semibold" : "font-medium"}`}
-                                >
-                                  {getChatName(conversation)}
-                                </h3>
-                                <span
-                                  className={`text-xs flex-shrink-0 ${hasUnread ? "text-primary font-medium" : "text-muted-foreground"}`}
-                                >
-                                  {getTimeString(
-                                    conversation.lastMessage
-                                      .timestamp,
+                                {hasUnread && (
+                                  <Badge className="absolute -top-1 -right-1 h-5 min-w-[20px] px-1.5 rounded-full flex items-center justify-center text-xs shadow-sm">
+                                    {conversation.unreadCount >
+                                    9
+                                      ? "9+"
+                                      : conversation.unreadCount}
+                                  </Badge>
+                                )}
+                                {!hasUnread &&
+                                  !conversation.isGroup && (
+                                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-background" />
                                   )}
-                                </span>
                               </div>
-                              <div className="flex items-center gap-1.5">
-                                <p
-                                  className={`text-sm truncate flex-1 max-w-60 ${hasUnread
-                                    ? "text-foreground font-medium"
-                                    : "text-muted-foreground"
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-baseline justify-between gap-2 mb-0.5">
+                                  <h3
+                                    className={`truncate flex-1 min-w-0 ${hasUnread ? "font-semibold" : "font-medium"}`}
+                                  >
+                                    {getChatName(conversation)}
+                                  </h3>
+                                  <span
+                                    className={`text-xs flex-shrink-0 ${hasUnread ? "text-primary font-medium" : "text-muted-foreground"}`}
+                                  >
+                                    {getTimeString(
+                                      conversation.lastMessage
+                                        .timestamp,
+                                    )}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                  <p
+                                    className={`text-sm truncate flex-1 max-w-60 ${
+                                      hasUnread
+                                        ? "text-foreground font-medium"
+                                        : "text-muted-foreground"
                                     }`}
-                                >
-                                  {conversation.lastMessage
-                                    .senderId ===
-                                    currentUserId && (
+                                  >
+                                    {conversation.lastMessage
+                                      .senderId ===
+                                      currentUserId && (
                                       <span className="inline-flex items-center gap-0.5 mr-1">
-                                        {conversation.lastMessage
-                                          .read ? (
+                                        {conversation
+                                          .lastMessage.read ? (
                                           <CheckCheck className="w-3.5 h-3.5 text-blue-500" />
                                         ) : (
                                           <Check className="w-3.5 h-3.5" />
                                         )}
                                       </span>
                                     )}
-                                  {conversation.lastMessage
-                                    .type === "recommendation"
-                                    ? "📽️ Shared a recommendation"
-                                    : conversation.lastMessage
-                                      .message}
-                                </p>
+                                    {conversation.lastMessage
+                                      .type === "recommendation"
+                                      ? "📽️ Shared a recommendation"
+                                      : conversation.lastMessage
+                                          .message}
+                                  </p>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      },
+                    )}
                   </div>
                 </ScrollArea>
               </CardContent>
@@ -667,8 +787,9 @@ export function ChatPage({
 
         {/* Chat Area */}
         <div
-          className={`${!selectedChat ? "hidden md:flex" : "flex"
-            } flex-1 flex-col min-w-0 ${isMobileFullScreen ? 'h-full' : ''}`}
+          className={`${
+            !selectedChat ? "hidden md:flex" : "flex"
+          } flex-1 flex-col min-w-0 ${isMobileFullScreen ? "h-full" : ""}`}
         >
           {selectedConversation ? (
             isMobileFullScreen ? (
@@ -760,7 +881,7 @@ export function ChatPage({
                           !isOwn &&
                           (index === 0 ||
                             chatMessages[index - 1].senderId !==
-                            message.senderId);
+                              message.senderId);
 
                         return (
                           <div
@@ -791,16 +912,19 @@ export function ChatPage({
                               {message.type === "system" ? (
                                 <div className="text-center my-4">
                                   <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-muted rounded-full text-xs text-muted-foreground">
-                                    <span>{message.message}</span>
+                                    <span>
+                                      {message.message}
+                                    </span>
                                   </div>
                                 </div>
                               ) : message.type ===
                                 "recommendation" ? (
                                 <div
-                                  className={`p-3 rounded-2xl border-2 shadow-sm ${isOwn
-                                    ? "bg-primary text-primary-foreground border-primary/20"
-                                    : "bg-card border-border"
-                                    }`}
+                                  className={`p-3 rounded-2xl border-2 shadow-sm ${
+                                    isOwn
+                                      ? "bg-primary text-primary-foreground border-primary/20"
+                                      : "bg-card border-border"
+                                  }`}
                                 >
                                   <div className="flex items-center gap-2 mb-2">
                                     <Star
@@ -837,10 +961,11 @@ export function ChatPage({
                                 </div>
                               ) : (
                                 <div
-                                  className={`group relative px-4 py-2.5 rounded-2xl break-words shadow-sm ${isOwn
-                                    ? "bg-primary text-primary-foreground rounded-br-md"
-                                    : "bg-card rounded-bl-md"
-                                    }`}
+                                  className={`group relative px-4 py-2.5 rounded-2xl break-words shadow-sm ${
+                                    isOwn
+                                      ? "bg-primary text-primary-foreground rounded-br-md"
+                                      : "bg-card rounded-bl-md"
+                                  }`}
                                 >
                                   <p className="text-sm leading-relaxed">
                                     {message.message}
@@ -849,10 +974,11 @@ export function ChatPage({
                               )}
                               {message.type !== "system" && (
                                 <div
-                                  className={`flex items-center gap-1 mt-1 px-1 ${isOwn
-                                    ? "justify-end"
-                                    : "justify-start"
-                                    }`}
+                                  className={`flex items-center gap-1 mt-1 px-1 ${
+                                    isOwn
+                                      ? "justify-end"
+                                      : "justify-start"
+                                  }`}
                                 >
                                   <p className="text-xs text-muted-foreground">
                                     {new Date(
@@ -940,7 +1066,10 @@ export function ChatPage({
                         value={newMessage}
                         onChange={handleTextareaChange}
                         onKeyDown={(e) => {
-                          if (e.key === "Enter" && !e.shiftKey) {
+                          if (
+                            e.key === "Enter" &&
+                            !e.shiftKey
+                          ) {
                             e.preventDefault();
                             sendMessage();
                           }
@@ -955,10 +1084,11 @@ export function ChatPage({
                         onClick={() =>
                           setShowEmojiPicker(!showEmojiPicker)
                         }
-                        className={`absolute right-1.5 top-2 h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary active:scale-95 transition-all rounded-full ${showEmojiPicker
-                          ? "bg-primary/10 text-primary"
-                          : ""
-                          }`}
+                        className={`absolute right-1.5 top-2 h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary active:scale-95 transition-all rounded-full ${
+                          showEmojiPicker
+                            ? "bg-primary/10 text-primary"
+                            : ""
+                        }`}
                       >
                         <Smile className="w-4 h-4" />
                       </Button>
@@ -975,20 +1105,34 @@ export function ChatPage({
                           />
                           {/* Emoji Picker Panel */}
                           <div
-                            className="absolute bottom-full right-0 mb-2 z-50 w-[min(340px,calc(100vw-2rem))]"
+                            className="fixed bottom-0 left-0 right-0 z-50 max-h-[70vh] flex items-end justify-center p-2"
                             onClick={(e) => e.stopPropagation()}
                           >
-                            <Card className="shadow-xl border-2">
-                              <CardContent className="p-0">
-                                <EmojiPicker
-                                  onEmojiSelect={
-                                    handleEmojiSelect
-                                  }
-                                />
-                              </CardContent>
+                            <Card className="shadow-xl border-2 w-full max-w-md">
+                              <ChatEmojiPicker
+                                onEmojiSelect={handleEmojiSelect}
+                                showSearch={true}
+                              />
                             </Card>
                           </div>
                         </>
+                      )}
+
+                      {/* Emoji Autocomplete - Mobile */}
+                      {emojiAutocomplete.show && (
+                        <EmojiAutocomplete
+                          query={emojiAutocomplete.query}
+                          onSelect={handleEmojiAutocompleteSelect}
+                          onClose={() =>
+                            setEmojiAutocomplete({
+                              show: false,
+                              query: '',
+                              position: { top: 0, left: 0 },
+                              colonIndex: -1,
+                            })
+                          }
+                          position={emojiAutocomplete.position}
+                        />
                       )}
                     </div>
                     <Button
@@ -1006,7 +1150,7 @@ export function ChatPage({
               </div>
             ) : (
               // Desktop card view
-              <Card className="flex-1 flex flex-col shadow-sm">
+              <Card className="flex-1 flex flex-col shadow-sm overflow-hidden h-full">
                 {/* Chat Header */}
                 <CardHeader className="pb-3 px-4 md:px-5 flex-shrink-0 border-b">
                   <div className="flex items-center justify-between gap-3">
@@ -1077,7 +1221,7 @@ export function ChatPage({
                 </CardHeader>
 
                 {/* Messages */}
-                <CardContent className="flex-1 p-0 overflow-hidden bg-muted/30">
+                <CardContent className="flex-1 p-0 overflow-hidden bg-muted/30 min-h-0">
                   <ScrollArea
                     className="h-full"
                     ref={scrollAreaRef}
@@ -1093,7 +1237,7 @@ export function ChatPage({
                           !isOwn &&
                           (index === 0 ||
                             chatMessages[index - 1].senderId !==
-                            message.senderId);
+                              message.senderId);
 
                         return (
                           <div
@@ -1124,16 +1268,19 @@ export function ChatPage({
                               {message.type === "system" ? (
                                 <div className="text-center my-4">
                                   <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-muted rounded-full text-xs text-muted-foreground">
-                                    <span>{message.message}</span>
+                                    <span>
+                                      {message.message}
+                                    </span>
                                   </div>
                                 </div>
                               ) : message.type ===
                                 "recommendation" ? (
                                 <div
-                                  className={`p-3 rounded-2xl border-2 shadow-sm ${isOwn
-                                    ? "bg-primary text-primary-foreground border-primary/20"
-                                    : "bg-card border-border"
-                                    }`}
+                                  className={`p-3 rounded-2xl border-2 shadow-sm ${
+                                    isOwn
+                                      ? "bg-primary text-primary-foreground border-primary/20"
+                                      : "bg-card border-border"
+                                  }`}
                                 >
                                   <div className="flex items-center gap-2 mb-2">
                                     <Star
@@ -1170,10 +1317,11 @@ export function ChatPage({
                                 </div>
                               ) : (
                                 <div
-                                  className={`group relative px-4 py-2.5 rounded-2xl break-words shadow-sm ${isOwn
-                                    ? "bg-primary text-primary-foreground rounded-br-md"
-                                    : "bg-card rounded-bl-md"
-                                    }`}
+                                  className={`group relative px-4 py-2.5 rounded-2xl break-words shadow-sm ${
+                                    isOwn
+                                      ? "bg-primary text-primary-foreground rounded-br-md"
+                                      : "bg-card rounded-bl-md"
+                                  }`}
                                 >
                                   <p className="text-sm leading-relaxed">
                                     {message.message}
@@ -1182,10 +1330,11 @@ export function ChatPage({
                               )}
                               {message.type !== "system" && (
                                 <div
-                                  className={`flex items-center gap-1 mt-1 px-1 ${isOwn
-                                    ? "justify-end"
-                                    : "justify-start"
-                                    }`}
+                                  className={`flex items-center gap-1 mt-1 px-1 ${
+                                    isOwn
+                                      ? "justify-end"
+                                      : "justify-start"
+                                  }`}
                                 >
                                   <p className="text-xs text-muted-foreground">
                                     {new Date(
@@ -1273,7 +1422,10 @@ export function ChatPage({
                         value={newMessage}
                         onChange={handleTextareaChange}
                         onKeyDown={(e) => {
-                          if (e.key === "Enter" && !e.shiftKey) {
+                          if (
+                            e.key === "Enter" &&
+                            !e.shiftKey
+                          ) {
                             e.preventDefault();
                             sendMessage();
                           }
@@ -1288,10 +1440,11 @@ export function ChatPage({
                         onClick={() =>
                           setShowEmojiPicker(!showEmojiPicker)
                         }
-                        className={`absolute right-1.5 top-2 h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary active:scale-95 transition-all rounded-full ${showEmojiPicker
-                          ? "bg-primary/10 text-primary"
-                          : ""
-                          }`}
+                        className={`absolute right-1.5 top-2 h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary active:scale-95 transition-all rounded-full ${
+                          showEmojiPicker
+                            ? "bg-primary/10 text-primary"
+                            : ""
+                        }`}
                       >
                         <Smile className="w-4 h-4" />
                       </Button>
@@ -1312,13 +1465,10 @@ export function ChatPage({
                             onClick={(e) => e.stopPropagation()}
                           >
                             <Card className="shadow-xl border-2">
-                              <CardContent className="p-0">
-                                <EmojiPicker
-                                  onEmojiSelect={
-                                    handleEmojiSelect
-                                  }
-                                />
-                              </CardContent>
+                              <ChatEmojiPicker
+                                onEmojiSelect={handleEmojiSelect}
+                                showSearch={true}
+                              />
                             </Card>
                           </div>
                         </>
@@ -1361,141 +1511,3 @@ export function ChatPage({
   );
 }
 
-// Emoji Picker Component
-interface EmojiPickerProps {
-  onEmojiSelect: (emoji: string) => void;
-}
-
-function EmojiPicker({ onEmojiSelect }: EmojiPickerProps) {
-  const emojiCategories = {
-    Smileys: [
-      "😀",
-      "😃",
-      "😄",
-      "😁",
-      "😆",
-      "😅",
-      "🤣",
-      "😂",
-      "🙂",
-      "🙃",
-      "😉",
-      "😊",
-      "😇",
-      "🥰",
-      "😍",
-      "🤩",
-      "😘",
-      "😗",
-      "😚",
-      "😙",
-      "🥲",
-      "😋",
-      "😛",
-      "😜",
-      "🤪",
-      "😝",
-      "🤑",
-      "🤗",
-      "🤭",
-      "🤫",
-      "🤔",
-    ],
-    Gestures: [
-      "👍",
-      "👎",
-      "👌",
-      "✌️",
-      "🤞",
-      "🤟",
-      "🤘",
-      "🤙",
-      "👈",
-      "👉",
-      "👆",
-      "👇",
-      "☝️",
-      "👏",
-      "🙌",
-      "👐",
-      "🤲",
-      "🤝",
-      "🙏",
-      "✍️",
-      "💪",
-      "🦾",
-      "🦿",
-      "🦵",
-      "🦶",
-    ],
-    Hearts: [
-      "❤️",
-      "🧡",
-      "💛",
-      "💚",
-      "💙",
-      "💜",
-      "🖤",
-      "🤍",
-      "🤎",
-      "💔",
-      "❤️‍🔥",
-      "❤️‍🩹",
-      "💕",
-      "💞",
-      "💓",
-      "💗",
-      "💖",
-      "💘",
-      "💝",
-      "💟",
-    ],
-    Objects: [
-      "⭐",
-      "✨",
-      "🌟",
-      "💫",
-      "🔥",
-      "💥",
-      "💯",
-      "✅",
-      "❌",
-      "🎉",
-      "🎊",
-      "🎈",
-      "🎁",
-      "🏆",
-      "🥇",
-      "🥈",
-      "🥉",
-      "⚽",
-      "🏀",
-      "🏈",
-    ],
-  };
-
-  return (
-    <div className="w-full max-h-64 overflow-y-auto">
-      <div className="p-3 space-y-3">
-        {Object.entries(emojiCategories).map(([category, emojis]) => (
-          <div key={category}>
-            <h4 className="text-xs font-medium text-muted-foreground mb-2 px-1">
-              {category}
-            </h4>
-            <div className="grid grid-cols-8 gap-1">
-              {emojis.map((emoji, index) => (
-                <button
-                  key={index}
-                  onClick={() => onEmojiSelect(emoji)}
-                  className="text-xl p-1.5 hover:bg-muted rounded transition-colors active:scale-95"
-                >
-                  {emoji}
-                </button>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}

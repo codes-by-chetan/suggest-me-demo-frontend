@@ -159,27 +159,28 @@ export function RecommendationsManager({
       <div className="max-w-6xl mx-auto p-6 space-y-6">
         {/* Header */}
         <FadeIn delay={0.1}>
-          <div className="flex items-center justify-between">
-            <div>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
               <motion.h1
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2 }}
+                className="text-2xl sm:text-3xl"
               >
                 Manage Recommendations
               </motion.h1>
               <motion.p
-                className="text-muted-foreground"
+                className="text-sm sm:text-base text-muted-foreground"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.3 }}
               >
-                Create, track, and manage your content
-                suggestions
+                Create, track, and manage your content suggestions
               </motion.p>
             </div>
 
             <motion.div
+              className="flex-shrink-0"
               initial={{ opacity: 0, scale: 0 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{
@@ -193,9 +194,10 @@ export function RecommendationsManager({
                 onOpenChange={setIsNewRecommendationOpen}
               >
                 <DialogTrigger asChild>
-                  <Button>
-                    <Plus className="w-4 h-4 mr-2" />
-                    New Recommendation
+                  <Button className="w-full sm:w-auto">
+                    <Plus className="w-4 h-4 sm:mr-2" />
+                    <span className="hidden sm:inline">New Recommendation</span>
+                    <span className="sm:hidden">New</span>
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl">
@@ -354,21 +356,21 @@ export function RecommendationsManager({
 
         {/* Stats Cards */}
         <StaggerContainer
-          className="grid grid-cols-1 md:grid-cols-3 gap-4"
+          className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4"
           staggerChildren={0.1}
           delayChildren={0.4}
         >
           <StaggerItem>
             <SlideInCard direction="up">
               <Card className="hover:shadow-lg transition-all duration-300 hover:scale-105">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4">
-                    <motion.div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
-                      <Send className="w-6 h-6 text-blue-600" />
+                <CardContent className="p-3 sm:p-6">
+                  <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-center sm:text-left">
+                    <motion.div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Send className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
                     </motion.div>
-                    <div>
+                    <div className="min-w-0">
                       <motion.p
-                        className="text-2xl"
+                        className="text-lg sm:text-2xl"
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{
@@ -379,7 +381,7 @@ export function RecommendationsManager({
                       >
                         {sentRecommendations.length}
                       </motion.p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
                         Sent
                       </p>
                     </div>
@@ -392,14 +394,14 @@ export function RecommendationsManager({
           <StaggerItem>
             <SlideInCard direction="up">
               <Card className="hover:shadow-lg transition-all duration-300 hover:scale-105">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4">
-                    <motion.div className="w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
-                      <Heart className="w-6 h-6 text-green-600" />
+                <CardContent className="p-3 sm:p-6">
+                  <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-center sm:text-left">
+                    <motion.div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Heart className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
                     </motion.div>
-                    <div>
+                    <div className="min-w-0">
                       <motion.p
-                        className="text-2xl"
+                        className="text-lg sm:text-2xl"
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{
@@ -410,7 +412,7 @@ export function RecommendationsManager({
                       >
                         {receivedRecommendations.length}
                       </motion.p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
                         Received
                       </p>
                     </div>
@@ -420,17 +422,17 @@ export function RecommendationsManager({
             </SlideInCard>
           </StaggerItem>
 
-          <StaggerItem>
+          <StaggerItem className="col-span-2 md:col-span-1">
             <SlideInCard direction="up">
               <Card className="hover:shadow-lg transition-all duration-300 hover:scale-105">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4">
-                    <motion.div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center">
-                      <MessageSquare className="w-6 h-6 text-purple-600" />
+                <CardContent className="p-3 sm:p-6">
+                  <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-center sm:text-left">
+                    <motion.div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <MessageSquare className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
                     </motion.div>
-                    <div>
+                    <div className="min-w-0">
                       <motion.p
-                        className="text-2xl"
+                        className="text-lg sm:text-2xl"
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{
@@ -441,7 +443,7 @@ export function RecommendationsManager({
                       >
                         12
                       </motion.p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
                         Discussions
                       </p>
                     </div>
@@ -688,7 +690,7 @@ export function RecommendationsManager({
                                   </p>
 
                                   <StaggerContainer
-                                    className="flex items-center gap-2"
+                                    className="flex flex-wrap items-center gap-2"
                                     staggerChildren={0.05}
                                     delayChildren={
                                       1.6 + index * 0.1
@@ -707,8 +709,8 @@ export function RecommendationsManager({
                                           variant="outline"
                                           size="sm"
                                         >
-                                          <MessageSquare className="w-4 h-4 mr-1" />
-                                          Chat
+                                          <MessageSquare className="w-4 h-4 md:mr-1" />
+                                          <span className="hidden md:inline">Chat</span>
                                         </Button>
                                       </motion.div>
                                     </StaggerItem>
@@ -730,8 +732,8 @@ export function RecommendationsManager({
                                             )
                                           }
                                         >
-                                          <Eye className="w-4 h-4 mr-1" />
-                                          View Content
+                                          <Eye className="w-4 h-4 md:mr-1" />
+                                          <span className="hidden md:inline">View Content</span>
                                         </Button>
                                       </motion.div>
                                     </StaggerItem>
@@ -750,8 +752,8 @@ export function RecommendationsManager({
                                               variant="outline"
                                               size="sm"
                                             >
-                                              <Edit className="w-4 h-4 mr-1" />
-                                              Edit
+                                              <Edit className="w-4 h-4 md:mr-1" />
+                                              <span className="hidden md:inline">Edit</span>
                                             </Button>
                                           </motion.div>
                                         </StaggerItem>
@@ -768,8 +770,8 @@ export function RecommendationsManager({
                                               variant="outline"
                                               size="sm"
                                             >
-                                              <Trash2 className="w-4 h-4 mr-1" />
-                                              Delete
+                                              <Trash2 className="w-4 h-4 md:mr-1" />
+                                              <span className="hidden md:inline">Delete</span>
                                             </Button>
                                           </motion.div>
                                         </StaggerItem>

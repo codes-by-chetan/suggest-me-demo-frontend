@@ -11,6 +11,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "./ui/tabs";
+import { motion, AnimatePresence } from "motion/react";
 
 interface TabItem {
   value: string;
@@ -115,21 +116,108 @@ export function SwipeableTabs({
           <TabsTrigger
             key={tab.value}
             value={tab.value}
-            className="flex-1 flex items-center justify-center gap-1.5 text-xs sm:text-sm px-2 py-2 h-auto"
+            className="flex-1 flex items-center justify-center gap-1.5 text-xs sm:text-sm px-2 py-2 h-auto relative"
           >
+            {/* Sliding background indicator for active tab */}
+            {activeTab === tab.value && (
+              <motion.div
+                layoutId="activeTabIndicator"
+                className="absolute inset-0 bg-primary rounded-xl shadow-sm"
+                transition={{
+                  type: "spring",
+                  stiffness: 400,
+                  damping: 35,
+                  duration: 0.1,
+                }}
+              />
+            )}
+
             {/* Mobile: Show icon for inactive tabs, text+icon for active tab */}
-            <span className="flex items-center gap-1.5 sm:hidden">
-              {tab.icon}
-              {activeTab === tab.value && (
-                <span className="text-xs font-medium">{tab.label}</span>
-              )}
-            </span>
+            <motion.span
+              className="flex items-center gap-1.5 sm:hidden relative z-10"
+              layout
+              transition={{
+                type: "spring",
+                stiffness: 400,
+                damping: 35,
+                duration: 0.1,
+              }}
+            >
+              <motion.span
+                layout
+                transition={{
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 30,
+                }}
+              >
+                {tab.icon}
+              </motion.span>
+              <AnimatePresence mode="wait">
+                {activeTab === tab.value && (
+                  <motion.span
+                    key="label"
+                    className="text-xs font-medium whitespace-nowrap text-accent"
+                    initial={{
+                      opacity: 0,
+                      width: 0,
+                      marginLeft: 0,
+                    }}
+                    animate={{
+                      opacity: 1,
+                      width: "auto",
+                      marginLeft: 6,
+                      transition: {
+                        opacity: { duration: 0.2, delay: 0.1 },
+                        width: {
+                          duration: 0.3,
+                          ease: [0.4, 0, 0.2, 1],
+                        },
+                        marginLeft: {
+                          duration: 0.3,
+                          ease: [0.4, 0, 0.2, 1],
+                        },
+                      },
+                    }}
+                    exit={{
+                      opacity: 0,
+                      width: 0,
+                      marginLeft: 0,
+                      transition: {
+                        opacity: { duration: 0.15 },
+                        width: {
+                          duration: 0.25,
+                          ease: [0.4, 0, 0.2, 1],
+                        },
+                        marginLeft: {
+                          duration: 0.25,
+                          ease: [0.4, 0, 0.2, 1],
+                        },
+                      },
+                    }}
+                  >
+                    {tab.label}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </motion.span>
 
             {/* Desktop: Show both icon and text always */}
-            <span className="hidden sm:flex items-center gap-1.5">
-              {tab.icon}
-              <span className="font-medium">{tab.label}</span>
-            </span>
+            <motion.span
+              className={
+                "hidden sm:flex items-center gap-1.5 relative z-10 ease-in-out"
+              }
+              transition={{
+                duration: 0.2,
+                ease: [0.4, 0, 0.2, 1],
+              }}
+            >
+              {" "}
+              {tab.icon}{" "}
+              <span className="font-medium">
+                {tab.label}
+              </span>{" "}
+            </motion.span>
           </TabsTrigger>
         ))}
       </TabsList>
@@ -146,8 +234,28 @@ export function SwipeableTabs({
             key={tab.value}
             value={tab.value}
             className="mt-6"
+            asChild
           >
-            {tab.content}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{
+                opacity: 1,
+                y: 0,
+                transition: {
+                  duration: 0.3,
+                  ease: [0.4, 0, 0.2, 1],
+                },
+              }}
+              exit={{
+                opacity: 0,
+                y: -10,
+                transition: {
+                  duration: 0.2,
+                },
+              }}
+            >
+              {tab.content}
+            </motion.div>
           </TabsContent>
         ))}
       </div>

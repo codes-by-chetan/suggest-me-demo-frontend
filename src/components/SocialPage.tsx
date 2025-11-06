@@ -97,13 +97,13 @@ export function SocialPage({
       <div className="container mx-auto px-4 py-6 space-y-6">
         {/* Header */}
         <FadeIn delay={0.1}>
-          <div className="flex items-center justify-between">
-            <div>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
               <motion.h1
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2 }}
-                className="text-3xl"
+                className="text-2xl sm:text-3xl"
               >
                 Social
               </motion.h1>
@@ -111,13 +111,13 @@ export function SocialPage({
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.3 }}
-                className="text-muted-foreground"
+                className="text-sm sm:text-base text-muted-foreground"
               >
                 Connect with friends and discover new content
               </motion.p>
             </div>
             <motion.div
-              className="flex items-center gap-3"
+              className="flex items-center gap-2 sm:gap-3 flex-shrink-0"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
@@ -133,10 +133,13 @@ export function SocialPage({
               >
                 <Badge
                   variant="secondary"
-                  className="flex items-center gap-1"
+                  className="flex items-center gap-1 text-xs"
                 >
                   <Users className="w-3 h-3" />
-                  {followedUsers.size} following
+                  <span>{followedUsers.size} following</span>
+                  {/* <span className="xs:hidden">
+                    {followedUsers.size}
+                  </span> */}
                 </Badge>
               </motion.div>
               <motion.div
@@ -150,10 +153,13 @@ export function SocialPage({
               >
                 <Badge
                   variant="secondary"
-                  className="flex items-center gap-1"
+                  className="flex items-center gap-1 text-xs"
                 >
-                  <Heart className="w-3 h-3" />
-                  {socialStats.followers} followers
+                  <Heart className="w-3 h-3 text-red-500" />
+                  <span>{socialStats.followers} followers</span>
+                  {/* <span className="inline sm:hidden">
+                    {socialStats.followers}
+                  </span> */}
                 </Badge>
               </motion.div>
             </motion.div>

@@ -1,10 +1,22 @@
-import { motion, AnimatePresence } from 'motion/react';
-import { Button } from './ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { Separator } from './ui/separator';
-import { User, BookOpen, List, Settings, LogOut, Bell, MessageSquare } from 'lucide-react';
-import { Badge } from './ui/badge';
-import { useProfileDropdown } from '../contexts/ProfileDropdownContext';
+import { motion, AnimatePresence } from "motion/react";
+import { Button } from "./ui/button";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "./ui/avatar";
+import { Separator } from "./ui/separator";
+import {
+  User,
+  BookOpen,
+  List,
+  Settings,
+  LogOut,
+  Bell,
+  MessageSquare,
+} from "lucide-react";
+import { Badge } from "./ui/badge";
+import { useProfileDropdown } from "../contexts/ProfileDropdownContext";
 
 interface ProfileDropdownPopupProps {
   currentUser?: {
@@ -18,11 +30,11 @@ interface ProfileDropdownPopupProps {
   onNotificationClick?: () => void;
 }
 
-export function ProfileDropdownPopup({ 
-  currentUser, 
+export function ProfileDropdownPopup({
+  currentUser,
   onNavigate,
   isMobile = false,
-  onNotificationClick
+  onNotificationClick,
 }: ProfileDropdownPopupProps) {
   const { isOpen, closeProfileDropdown } = useProfileDropdown();
 
@@ -40,7 +52,7 @@ export function ProfileDropdownPopup({
 
   const handleLogout = () => {
     closeProfileDropdown();
-    console.log('Log out');
+    console.log("Log out");
     // Add logout logic here
   };
 
@@ -55,7 +67,7 @@ export function ProfileDropdownPopup({
           className="absolute inset-0"
           onClick={closeProfileDropdown}
         />
-        
+
         {/* Dropdown */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: -10 }}
@@ -68,8 +80,13 @@ export function ProfileDropdownPopup({
             {/* User Info */}
             <div className="flex items-center justify-start gap-2 p-2">
               <Avatar className="h-8 w-8">
-                <AvatarImage src={currentUser.avatar} alt={currentUser.displayName} />
-                <AvatarFallback>{currentUser.displayName.charAt(0)}</AvatarFallback>
+                <AvatarImage
+                  src={currentUser.avatar}
+                  alt={currentUser.displayName}
+                />
+                <AvatarFallback>
+                  {currentUser.displayName.charAt(0)}
+                </AvatarFallback>
               </Avatar>
               <div className="flex flex-col space-y-1 leading-none">
                 <p className="font-medium text-sm">
@@ -80,29 +97,31 @@ export function ProfileDropdownPopup({
                 </p>
               </div>
             </div>
-            
+
             <Separator className="my-1" />
-            
+
             {/* Menu Items */}
             <MenuItem
               icon={<User className="mr-2 h-4 w-4" />}
               label="Profile"
-              onClick={() => handleNavigate('profile')}
+              onClick={() => handleNavigate("profile")}
             />
-            <MenuItem
-              icon={<BookOpen className="mr-2 h-4 w-4" />}
-              label="My Library"
-              onClick={() => handleNavigate('library')}
-            />
-            <MenuItem
-              icon={<List className="mr-2 h-4 w-4" />}
-              label="My Suggestions"
-              onClick={() => handleNavigate('recommendations')}
-            />
-            
+
             {/* Mobile-only menu items */}
             {isMobile && (
               <>
+                <MenuItem
+                  icon={<BookOpen className="mr-2 h-4 w-4" />}
+                  label="My Library"
+                  onClick={() => handleNavigate("library")}
+                />
+                <MenuItem
+                  icon={<List className="mr-2 h-4 w-4" />}
+                  label="My Suggestions"
+                  onClick={() =>
+                    handleNavigate("recommendations")
+                  }
+                />
                 <Separator className="my-1" />
                 <MenuItem
                   icon={<Bell className="mr-2 h-4 w-4" />}
@@ -111,20 +130,22 @@ export function ProfileDropdownPopup({
                   badge={3}
                 />
                 <MenuItem
-                  icon={<MessageSquare className="mr-2 h-4 w-4" />}
+                  icon={
+                    <MessageSquare className="mr-2 h-4 w-4" />
+                  }
                   label="Messages"
-                  onClick={() => handleNavigate('chat')}
+                  onClick={() => handleNavigate("chat")}
                   badge={7}
                 />
               </>
             )}
-            
+
             <Separator className="my-1" />
-            
+
             <MenuItem
               icon={<Settings className="mr-2 h-4 w-4" />}
               label="Settings"
-              onClick={() => handleNavigate('settings')}
+              onClick={() => handleNavigate("settings")}
             />
             <MenuItem
               icon={<LogOut className="mr-2 h-4 w-4" />}
@@ -145,7 +166,12 @@ interface MenuItemProps {
   badge?: number;
 }
 
-function MenuItem({ icon, label, onClick, badge }: MenuItemProps) {
+function MenuItem({
+  icon,
+  label,
+  onClick,
+  badge,
+}: MenuItemProps) {
   return (
     <div
       onClick={onClick}
