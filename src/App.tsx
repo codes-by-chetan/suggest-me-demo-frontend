@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Content } from './types';
+import { Content, User } from './types';
 import { mockUsers, mockContent, mockReviews, mockActivities, mockRecommendations } from './data/mockData';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { NotificationsProvider, useNotifications } from './contexts/NotificationsContext';
@@ -20,6 +20,7 @@ import { NotificationsPage } from './components/NotificationsPage';
 import { ChatPage } from './components/ChatPage';
 import { ProfilePage } from './components/ProfilePage';
 import { UserProfilePage } from './components/UserProfilePage';
+import { SettingsPage } from './components/SettingsPage';
 import { SwipeableTabs } from './components/SwipeableTabs';
 import { PageTransition, StaggerContainer, StaggerItem, SlideInCard, FadeIn } from './components/PageTransition';
 import { Button } from './components/ui/button';
@@ -35,11 +36,12 @@ function AppContent() {
   const [selectedContent, setSelectedContent] = useState<Content | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [followedUsers, setFollowedUsers] = useState<Set<string>>(new Set(['2', '3']));
+  const [favoriteContent, setFavoriteContent] = useState<Set<string>>(new Set(['1', '2', '3', '4']));
   const [searchQuery, setSearchQuery] = useState('');
   const [isMobile, setIsMobile] = useState(false);
   
   // Mock current user (in a real app, this would come from authentication)
-  const currentUser = mockUsers[0];
+  const [currentUser, setCurrentUser] = useState<User>(mockUsers[0]);
   
   // Get notifications context
   const { openNotifications } = useNotifications();
@@ -82,6 +84,25 @@ function AppContent() {
       }
       return newSet;
     });
+  };
+
+  const handleToggleFavorite = (contentId: string) => {
+    setFavoriteContent(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(contentId)) {
+        newSet.delete(contentId);
+      } else {
+        newSet.add(contentId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleUpdateProfile = (updates: Partial<User>) => {
+    setCurrentUser(prev => ({
+      ...prev,
+      ...updates
+    }));
   };
 
   // Detect mobile screen size
@@ -459,6 +480,30 @@ function AppContent() {
             currentUserId={currentUser.id}
             isOwnProfile={true}
             onContentClick={handleContentClick}
+            favoriteContentIds={favoriteContent}
+            onToggleFavorite={handleToggleFavorite}
+            onNavigateToSettings={() => handleNavigation('settings')}
+          />
+          <MobileBottomNav 
+            currentPage={currentPage}
+            onNavigate={handleNavigation}
+            notificationCount={3}
+            messageCount={7}
+          />
+        </PageWrapper>
+      </AnimatePresence>
+    );
+  }
+
+  // Settings Page
+  if (currentPage === 'settings') {
+    return (
+      <AnimatePresence mode="wait">
+        <PageWrapper>
+          <SettingsPage
+            currentUser={currentUser}
+            onUpdateProfile={handleUpdateProfile}
+            onBack={() => handleNavigation('profile')}
           />
           <MobileBottomNav 
             currentPage={currentPage}
@@ -689,7 +734,7 @@ function AppContent() {
                       <StaggerContainer staggerChildren={0.1} delayChildren={0.5}>
                         <StaggerItem>
                           <motion.div 
-                            className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors"
+                            className="flex items-center justify-between p-2  rounded-lg hover:bg-muted/50 transition-colors"
                             whileHover={{ scale: 1.02 }}
                           >
                             <div className="flex items-center gap-2">
@@ -729,7 +774,7 @@ function AppContent() {
                 </SlideInCard>
 
                 {/* Popular This Week */}
-                <SlideInCard direction="right" delay={0.5}>
+                {/* <SlideInCard direction="right" delay={0.5}>
                   <Card className="hover:shadow-lg transition-all duration-300">
                     <CardHeader>
                       <CardTitle className="text-lg">Popular This Week</CardTitle>
@@ -768,7 +813,7 @@ function AppContent() {
                       </FadeIn>
                     </CardContent>
                   </Card>
-                </SlideInCard>
+                </SlideInCard> */}
 
                 {/* Friend Suggestions */}
                 <SlideInCard direction="right" delay={0.6}>

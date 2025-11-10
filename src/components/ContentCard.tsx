@@ -106,14 +106,14 @@ export function ContentCard({
         }}
       >
         <Card
-          className="group cursor-pointer transition-all w-full"
+          className="group cursor-pointer transition-all w-full !pb-0"
           onClick={handleCardClick}
         >
           <CardContent className="p-0">
             <div className="flex gap-3 p-3">
               <div className="relative flex-shrink-0">
                 <div
-                  className={`w-16 sm:w-20 ${getAspectRatio(content.type)} relative overflow-hidden rounded-lg`}
+                  className={`w-16 sm:w-28 ${getAspectRatio(content.type)} relative overflow-hidden rounded-lg`}
                 >
                   <ImageWithFallback
                     src={content.poster}
@@ -236,18 +236,18 @@ export function ContentCard({
       style={{ WebkitTapHighlightColor: "transparent" }}
     >
       <Card
-        className="cursor-pointer overflow-visible shadow-md hover:shadow-2xl transition-shadow duration-300 w-full max-w-[220px] sm:max-w-sm mx-auto"
+        className="cursor-pointer overflow-visible shadow-md hover:shadow-2xl transition-shadow duration-300 w-full max-w-[120px] sm:max-w-sm mx-auto"
         onClick={handleCardClick}
       >
-        <CardContent className="p-0 relative overflow-visible">
+        <CardContent className="p-0 relative overflow-visible !pb-0">
           {/* Poster */}
           <div
             className="relative w-full h-[300px] sm:h-[340px] overflow-hidden rounded-lg"
             style={{ backgroundColor: ambientColor }}
           >
-            <div className="absolute inset-0 flex items-center justify-center p-4">
+            <div className="absolute inset-0 flex items-center justify-center p-3">
               <div
-                className={`${getAspectRatio(content.type)} ${getAspectRatio(content.type) === "aspect-square" ? "w-full max-w-[60%]" : "h-full max-h-full"} relative overflow-hidden rounded shadow-md`}
+                className={`${getAspectRatio(content.type)} ${getAspectRatio(content.type) === "aspect-square" ? "w-full max-w-[95%]" : "h-full max-h-full"} relative overflow-hidden rounded shadow-md`}
               >
                 <ImageWithFallback
                   src={content.poster}
@@ -332,7 +332,7 @@ export function ContentCard({
           {/* DETAILS PANEL - hidden by default, expands on group hover */}
           <div
             // Position below the poster so it appears to grow out of the poster; using max-h transition for smoothness.
-            className="absolute  left-0 right-0 top-full mt-2 rounded-b-lg bg-card border border-t-0 border-border shadow-xl overflow-hidden transform-gpu"
+            className="hidden group-hover:block absolute  left-0 right-0 top-[95%] mt-2 rounded-b-lg bg-card border border-t-0 border-border shadow-xl overflow-hidden transform-gpu"
             style={{ willChange: "transform, opacity" }}
           >
             {/* inner wrapper that transitions height and opacity using max-h trick */}

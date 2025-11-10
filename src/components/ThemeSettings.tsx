@@ -67,7 +67,7 @@ export function ThemeSettings() {
         variant={isOpen ? "secondary" : "ghost"} 
         size="sm" 
         onClick={handleToggle}
-        className="relative"
+        className="relative cursor-pointer"
         aria-expanded={isOpen}
         aria-haspopup="menu"
       >

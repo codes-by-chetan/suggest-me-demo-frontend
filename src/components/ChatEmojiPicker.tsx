@@ -8,6 +8,12 @@ import {
   TabsTrigger,
 } from "./ui/tabs";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
+import {
   Smile,
   Heart,
   Coffee,
@@ -157,6 +163,11 @@ export function ChatEmojiPicker({
       {
         emoji: "🥲",
         name: "smiling_face_with_tear",
+        keywords: ["sad", "cry", "happy"],
+      },
+      {
+        emoji: "😵",
+        name: "dizzy_face",
         keywords: ["sad", "cry", "happy"],
       },
       {
@@ -982,169 +993,187 @@ export function ChatEmojiPicker({
         ) || [];
 
   return (
-    <div className="w-full flex flex-col h-full max-h-[400px]">
-      {/* Search Bar */}
-      {showSearch && (
-        <div className="p-3 border-b flex-shrink-0">
-          <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              ref={searchInputRef}
-              type="text"
-              placeholder="Search emojis..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 h-9"
-            />
+    <TooltipProvider delayDuration={300}>
+      <div className="w-full flex flex-col h-full max-h-[400px]">
+        {/* Search Bar */}
+        {showSearch && (
+          <div className="p-3 border-b flex-shrink-0">
+            <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                ref={searchInputRef}
+                type="text"
+                placeholder="Search emojis..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 h-9"
+              />
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Category Tabs */}
-      <Tabs
-        value={activeTab}
-        onValueChange={setActiveTab}
-        className="flex-1 flex flex-col min-h-0"
-      >
-        <TabsList className="w-full justify-start px-2 h-12 bg-muted/50 flex-shrink-0">
-          <TabsTrigger
-            value="recent"
-            className="px-2 py-1.5"
-            title="Recent"
-          >
-            <Clock className="w-4 h-4" />
-          </TabsTrigger>
-          <TabsTrigger
-            value="smileys"
-            className="px-2 py-1.5"
-            title="Smileys & People"
-          >
-            <Smile className="w-4 h-4" />
-          </TabsTrigger>
-          <TabsTrigger
-            value="gestures"
-            className="px-2 py-1.5"
-            title="Gestures"
-          >
-            <span className="text-base">👋</span>
-          </TabsTrigger>
-          <TabsTrigger
-            value="hearts"
-            className="px-2 py-1.5"
-            title="Hearts & Symbols"
-          >
-            <Heart className="w-4 h-4" />
-          </TabsTrigger>
-          <TabsTrigger
-            value="nature"
-            className="px-2 py-1.5"
-            title="Animals & Nature"
-          >
-            <span className="text-base">🐶</span>
-          </TabsTrigger>
-          <TabsTrigger
-            value="food"
-            className="px-2 py-1.5"
-            title="Food & Drink"
-          >
-            <Coffee className="w-4 h-4" />
-          </TabsTrigger>
-          <TabsTrigger
-            value="activities"
-            className="px-2 py-1.5"
-            title="Activities"
-          >
-            <span className="text-base">⚽</span>
-          </TabsTrigger>
-          <TabsTrigger
-            value="objects"
-            className="px-2 py-1.5"
-            title="Objects"
-          >
-            <Lightbulb className="w-4 h-4" />
-          </TabsTrigger>
-        </TabsList>
+        {/* Category Tabs */}
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="flex-1 flex flex-col min-h-0"
+        >
+          <TabsList className="w-full justify-start px-2 h-12 bg-muted/50 flex-shrink-0">
+            <TabsTrigger
+              value="recent"
+              className="px-2 py-1.5"
+              title="Recent"
+            >
+              <Clock className="w-4 h-4" />
+            </TabsTrigger>
+            <TabsTrigger
+              value="smileys"
+              className="px-2 py-1.5"
+              title="Smileys & People"
+            >
+              <Smile className="w-4 h-4" />
+            </TabsTrigger>
+            <TabsTrigger
+              value="gestures"
+              className="px-2 py-1.5"
+              title="Gestures"
+            >
+              <span className="text-base">👋</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="hearts"
+              className="px-2 py-1.5"
+              title="Hearts & Symbols"
+            >
+              <Heart className="w-4 h-4" />
+            </TabsTrigger>
+            <TabsTrigger
+              value="nature"
+              className="px-2 py-1.5"
+              title="Animals & Nature"
+            >
+              <span className="text-base">🐶</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="food"
+              className="px-2 py-1.5"
+              title="Food & Drink"
+            >
+              <Coffee className="w-4 h-4" />
+            </TabsTrigger>
+            <TabsTrigger
+              value="activities"
+              className="px-2 py-1.5"
+              title="Activities"
+            >
+              <span className="text-base">⚽</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="objects"
+              className="px-2 py-1.5"
+              title="Objects"
+            >
+              <Lightbulb className="w-4 h-4" />
+            </TabsTrigger>
+          </TabsList>
 
-        <ScrollArea className="overflow-y-auto min-h-[200px] max-h-[200px] scrollbar-hide">
-          <div className="p-3">
-            {searchQuery && filteredEmojis ? (
-              // Search Results
-              filteredEmojis.length > 0 ? (
-                <div className="grid grid-cols-8 gap-1">
-                  {filteredEmojis.map((emojiObj, index) => (
-                    <button
-                      key={index}
-                      onClick={() =>
-                        handleEmojiClick(emojiObj.emoji)
-                      }
-                      className="text-2xl p-2 hover:bg-muted rounded transition-colors active:scale-95 relative group"
-                      title={emojiObj.name}
-                    >
-                      {emojiObj.emoji}
-                      <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 bg-popover text-popover-foreground text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10 shadow-lg">
-                        {emojiObj.name}
-                      </span>
-                    </button>
-                  ))}
-                </div>
+          <ScrollArea className="overflow-y-auto min-h-[200px] max-h-[200px] scrollbar-hide">
+            <div className="p-3">
+              {searchQuery && filteredEmojis ? (
+                // Search Results
+                filteredEmojis.length > 0 ? (
+                  <div className="grid grid-cols-8 gap-1">
+                    {filteredEmojis.map((emojiObj, index) => (
+                      <Tooltip key={index}>
+                        <TooltipTrigger asChild>
+                          <button
+                            onClick={() =>
+                              handleEmojiClick(emojiObj.emoji)
+                            }
+                            className="text-2xl w-10 h-10 flex items-center justify-center hover:bg-muted rounded-md transition-all duration-200 hover:scale-110 active:scale-95"
+                          >
+                            <span className="inline-flex items-center justify-center transition-transform duration-150 hover:rotate-12">
+                              {emojiObj.emoji}
+                            </span>
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent
+                          side="top"
+                          className="text-xs"
+                        >
+                          {emojiObj.name}
+                        </TooltipContent>
+                      </Tooltip>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Search className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No emojis found</p>
+                  </div>
+                )
+              ) : activeTab === "recent" ? (
+                // Recent Emojis
+                recentEmojis.length > 0 ? (
+                  <div className="grid grid-cols-8 gap-1">
+                    {recentEmojis.map((emoji, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleEmojiClick(emoji)}
+                        className="text-2xl w-10 h-10 flex items-center justify-center hover:bg-muted rounded-md transition-all duration-200 hover:scale-110 active:scale-95"
+                      >
+                        <span className="inline-flex items-center justify-center transition-transform duration-150 hover:rotate-12">
+                          {emoji}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Clock className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No recent emojis</p>
+                    <p className="text-xs mt-1">
+                      Your recently used emojis will appear here
+                    </p>
+                  </div>
+                )
               ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Search className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">No emojis found</p>
-                </div>
-              )
-            ) : activeTab === "recent" ? (
-              // Recent Emojis
-              recentEmojis.length > 0 ? (
-                <div className="grid grid-cols-8 gap-1">
-                  {recentEmojis.map((emoji, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleEmojiClick(emoji)}
-                      className="text-2xl p-2 hover:bg-muted rounded transition-colors active:scale-95"
-                    >
-                      {emoji}
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Clock className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">No recent emojis</p>
-                  <p className="text-xs mt-1">
-                    Your recently used emojis will appear here
-                  </p>
-                </div>
-              )
-            ) : (
-              // Category Emojis
-              <TabsContent value={activeTab} className="mt-0">
-                <div className="grid grid-cols-8 gap-1">
-                  {(
-                    emojiData[
-                      activeTab as keyof typeof emojiData
-                    ] || []
-                  ).map((emojiObj, index) => (
-                    <button
-                      key={index}
-                      onClick={() =>
-                        handleEmojiClick(emojiObj.emoji)
-                      }
-                      className="text-2xl p-2 hover:bg-muted rounded transition-colors active:scale-95 relative group"
-                      title={emojiObj.name}
-                    >
-                      {emojiObj.emoji}
-                      <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 bg-popover text-popover-foreground text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10 shadow-lg">
-                        {emojiObj.name}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </TabsContent>
-            )}
-          </div>
-        </ScrollArea>
-      </Tabs>
-    </div>
+                // Category Emojis
+                <TabsContent value={activeTab} className="mt-0">
+                  <div className="grid grid-cols-8 gap-1">
+                    {(
+                      emojiData[
+                        activeTab as keyof typeof emojiData
+                      ] || []
+                    ).map((emojiObj, index) => (
+                      <Tooltip key={index}>
+                        <TooltipTrigger asChild>
+                          <button
+                            onClick={() =>
+                              handleEmojiClick(emojiObj.emoji)
+                            }
+                            className="text-2xl w-10 h-10 flex items-center justify-center hover:bg-muted rounded-md transition-all duration-200 hover:scale-110 active:scale-95"
+                          >
+                            <span className="inline-flex items-center justify-center transition-transform duration-150 hover:rotate-12">
+                              {emojiObj.emoji}
+                            </span>
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent
+                          side="top"
+                          className="text-xs"
+                        >
+                          {emojiObj.name}
+                        </TooltipContent>
+                      </Tooltip>
+                    ))}
+                  </div>
+                </TabsContent>
+              )}
+            </div>
+          </ScrollArea>
+        </Tabs>
+      </div>
+    </TooltipProvider>
   );
 }

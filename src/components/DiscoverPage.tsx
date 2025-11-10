@@ -324,7 +324,7 @@ export function DiscoverPage({
                             transition={{ duration: 0.3 }}
                           >
                             <StaggerContainer
-                              className={`grid gap-4 ${viewMode === "grid" ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"}`}
+                              className={`grid gap-8 ${viewMode === "grid" ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5" : "grid-cols-1"}`}
                               staggerChildren={0.05}
                               delayChildren={0.4}
                             >
@@ -347,6 +347,7 @@ export function DiscoverPage({
                                 ),
                               )}
                             </StaggerContainer>
+                            <div className="min-h-[300px] w-full"></div>
                           </motion.div>
                         </AnimatePresence>
                       </div>
@@ -357,7 +358,7 @@ export function DiscoverPage({
                     label: "Top Rated",
                     icon: <Star className="w-4 h-4" />,
                     content: (
-                      <div className="space-y-4">
+                      <div className="space-y-4 ">
                         {/* <motion.div
                           className="flex items-center gap-2"
                           initial={{ opacity: 0, x: -20 }}
@@ -391,7 +392,7 @@ export function DiscoverPage({
                             transition={{ duration: 0.3 }}
                           >
                             <StaggerContainer
-                              className={`grid gap-4 ${viewMode === "grid" ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"}`}
+                              className={`grid gap-8 ${viewMode === "grid" ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5" : "grid-cols-1"}`}
                               staggerChildren={0.05}
                               delayChildren={0.4}
                             >
@@ -414,8 +415,10 @@ export function DiscoverPage({
                                 ),
                               )}
                             </StaggerContainer>
+                            <div className="min-h-[300px] w-full"></div>
                           </motion.div>
                         </AnimatePresence>
+                        <div className="h-[300px]"></div>
                       </div>
                     ),
                   },
@@ -463,7 +466,7 @@ export function DiscoverPage({
                             transition={{ duration: 0.3 }}
                           >
                             <StaggerContainer
-                              className={`grid gap-4 ${viewMode === "grid" ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"}`}
+                              className={`grid gap-8 ${viewMode === "grid" ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5" : "grid-cols-1"}`}
                               staggerChildren={0.05}
                               delayChildren={0.4}
                             >
@@ -486,6 +489,7 @@ export function DiscoverPage({
                                 ),
                               )}
                             </StaggerContainer>
+                            <div className="min-h-[300px] w-full"></div>
                           </motion.div>
                         </AnimatePresence>
                       </div>
@@ -532,7 +536,7 @@ export function DiscoverPage({
                             transition={{ duration: 0.3 }}
                           >
                             <StaggerContainer
-                              className={`grid gap-4 ${viewMode === "grid" ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"}`}
+                              className={`grid gap-8 ${viewMode === "grid" ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5" : "grid-cols-1"}`}
                               staggerChildren={0.05}
                               delayChildren={0.4}
                             >
@@ -555,6 +559,7 @@ export function DiscoverPage({
                                 ),
                               )}
                             </StaggerContainer>
+                            <div className="min-h-[300px] w-full"></div>
                           </motion.div>
                         </AnimatePresence>
                       </div>

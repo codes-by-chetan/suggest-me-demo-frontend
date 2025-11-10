@@ -27,7 +27,9 @@ import {
   TrendingUp,
   BarChart3,
   PlayCircle,
-  StarIcon
+  StarIcon,
+  X,
+  Trash
 } from 'lucide-react';
 
 interface ProfilePageProps {
@@ -38,6 +40,9 @@ interface ProfilePageProps {
   isOwnProfile?: boolean;
   profileUserId?: string;
   onContentClick: (content: Content) => void;
+  favoriteContentIds?: Set<string>;
+  onToggleFavorite?: (contentId: string) => void;
+  onNavigateToSettings?: () => void;
 }
 
 export function ProfilePage({ 
@@ -47,7 +52,10 @@ export function ProfilePage({
   currentUserId, 
   isOwnProfile = true,
   profileUserId,
-  onContentClick 
+  onContentClick,
+  favoriteContentIds = new Set(),
+  onToggleFavorite,
+  onNavigateToSettings
 }: ProfilePageProps) {
   const [selectedTab, setSelectedTab] = useState('overview');
   const [isFollowing, setIsFollowing] = useState(false);
@@ -95,7 +103,7 @@ export function ProfilePage({
   // Mock user's content activity
   const watchedContent = content.slice(0, 6);
   const watchingContent = content.slice(2, 5);
-  const favoriteContent = content.slice(0, 4);
+  const favoriteContent = content.filter(item => favoriteContentIds.has(item.id));
 
   return (
     <div className="container mx-auto px-4 py-6 space-y-6">
@@ -110,7 +118,11 @@ export function ProfilePage({
                 <AvatarFallback className="text-2xl">{user.displayName.charAt(0)}</AvatarFallback>
               </Avatar>
               {isOwnProfile ? (
-                <Button variant="outline" className="flex items-center gap-2">
+                <Button 
+                  variant="outline" 
+                  className="flex items-center gap-2"
+                  onClick={onNavigateToSettings}
+                >
                   <Edit className="w-4 h-4" />
                   Edit Profile
                 </Button>
@@ -140,7 +152,11 @@ export function ProfilePage({
                   <p className="text-muted-foreground text-lg">@{user.username}</p>
                 </div>
                 {isOwnProfile && (
-                  <Button variant="ghost" size="sm">
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={onNavigateToSettings}
+                  >
                     <Settings className="w-4 h-4" />
                   </Button>
                 )}
@@ -185,7 +201,7 @@ export function ProfilePage({
                 </div>
                 <div className="text-center">
                   <div className="text-2xl flex items-center gap-1">
-                    <Star className="w-5 h-5 text-yellow-500" />
+                    <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
                     {profileStats.avgRating}
                   </div>
                   <p className="text-xs text-muted-foreground">Avg Rating</p>
@@ -266,7 +282,7 @@ export function ProfilePage({
                                 <p className="font-medium">{item.title}</p>
                                 <p className="text-sm text-muted-foreground">Watched • 2 days ago</p>
                                 <div className="flex items-center gap-1 mt-1">
-                                  <Star className="w-3 h-3 text-yellow-500" />
+                                  <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
                                   <span className="text-xs">{item.rating}</span>
                                 </div>
                               </div>
@@ -333,13 +349,13 @@ export function ProfilePage({
                           onCardClick={onContentClick}
                           compact={true}
                         />
-                        <div className="px-4">
+                        {/* <div className="px-4">
                           <div className="flex justify-between text-sm text-muted-foreground mb-1">
                             <span>Progress</span>
                             <span>65%</span>
                           </div>
                           <Progress value={65} className="h-2" />
-                        </div>
+                        </div> */}
                       </div>
                     ))}
                   </div>
@@ -400,14 +416,41 @@ export function ProfilePage({
                 icon: <StarIcon className="w-4 h-4" />,
                 content: (
                   <div className="grid gap-4">
-                    {favoriteContent.map((item) => (
-                      <ContentCard
-                        key={item.id}
-                        content={item}
-                        onCardClick={onContentClick}
-                        compact={true}
-                      />
-                    ))}
+                    {favoriteContent.length === 0 ? (
+                      <Card>
+                        <CardContent className="p-8 text-center">
+                          <StarIcon className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                          <p className="text-muted-foreground">No favorites yet</p>
+                          <p className="text-sm text-muted-foreground mt-2">
+                            Start adding content to your favorites!
+                          </p>
+                        </CardContent>
+                      </Card>
+                    ) : (
+                      favoriteContent.map((item) => (
+                        <div key={item.id} className="relative group">
+                          <ContentCard
+                            content={item}
+                            onCardClick={onContentClick}
+                            compact={true}
+                          />
+                          {isOwnProfile && onToggleFavorite && (
+                            <Button
+                              variant="icon"
+                              size="sm"
+                              className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10 text-red-500"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onToggleFavorite(item.id);
+                              }}
+                            >
+                              <Trash className="w-4 h-4" />
+                              
+                            </Button>
+                          )}
+                        </div>
+                      ))
+                    )}
                   </div>
                 )
               }
